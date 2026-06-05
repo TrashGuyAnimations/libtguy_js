@@ -1,0 +1,56 @@
+name: build
+
+on:
+  push:
+    tags: [ '*' ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+  WASM_BUILD_TYPE: MinSizeRel
+  EM_VERSION: '5.0.7'
+  EM_CACHE_FOLDER: 'emsdk-cache'
+
+jobs:
+  build-wasm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup emsdk
+        uses: emscripten-core/setup-emsdk@v15
+        with:
+          version: ${{env.EM_VERSION}}
+          actions-cache-folder: ${{env.EM_CACHE_FOLDER}}
+      - name: Configure project
+        run: |
+          
+          COMMON_ARGS="
+          -DCMAKE_BUILD_TYPE=${{ env.WASM_BUILD_TYPE }}
+          -DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
+          -DTGUY_WASM_ONLY_BINDINGS=ON"
+
+          cmake -B build_smol \
+          $COMMON_ARGS \
+          -DTGUY_UNICODE_LIBRARY=none \
+          -DCMAKE_INSTALL_PREFIX="tguy_install"
+                      
+          cmake -B build_unicode \
+          $COMMON_ARGS \
+          -DTGUY_UNICODE_LIBRARY=wgrapheme \
+          -DCMAKE_INSTALL_PREFIX="tguy_unicode_install" 
+
+      - name: Install artifacts
+        run: |
+          cmake --build build_smol --target install
+          cmake --build build_unicode --target install
+          cp tguy_unicode_install/bin/libtguy.wasm tguy_install/bin/libtguy_unicode.wasm
+
+      - name: Publish Release if ref is a release tag
+        uses: softprops/action-gh-release@v3
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          fail_on_unmatched_files: true
+          files: |
+            tguy_install/bin/libtguy.js
+            tguy_install/bin/libtguy.wasm
+            tguy_install/bin/libtguy_unicode.wasm
