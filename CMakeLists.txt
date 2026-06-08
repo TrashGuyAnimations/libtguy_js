@@ -1,6 +1,16 @@
 cmake_minimum_required(VERSION 3.23)
 
-project(TGuy_wasm LANGUAGES C VERSION 0.1.0)
+include(cmake/GetVersionFromFile.cmake)
+get_version_from_file(
+    OUTPUT TGUY_WASM_VERSION
+    FILE "${CMAKE_CURRENT_SOURCE_DIR}/libtguy.js"
+    DECLARATOR_PREFIX "const"
+    DECLARATOR_SUFFIX "="
+    PREFIX TGUY_WASM_VER_
+    VERSIONS MAJOR MINOR PATCH
+)
+
+project(TGuy_wasm LANGUAGES C VERSION "${TGUY_WASM_VERSION}")
 
 option(TGUY_WASM_ONLY_BINDINGS "Only include methods which are used by the bindings" OFF)
 

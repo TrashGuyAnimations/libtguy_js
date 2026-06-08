@@ -1,4 +1,7 @@
 (function () {
+    const TGUY_WASM_VER_MAJOR = 0;
+    const TGUY_WASM_VER_MINOR = 1;
+    const TGUY_WASM_VER_PATCH = 1;
     const
         TYPE_PTR = Module.TGUY_DO_NOT_UNROLL_STRING = '*',
         TYPE_I32 = Module.TGUY_DO_NOT_UNROLL_STRING = 'i32',
@@ -21,7 +24,7 @@
 
     class TGuy {
         /**
-         * @param {(string|Array<string>)} text
+         * @param {string|Array<string>} text
          * @param {number=} spacing
          * @param {?string=} space
          * @param {?string=} can
@@ -30,7 +33,7 @@
          * @throws {RangeError|TypeError}
          */
         constructor(text, spacing = 4, space = null, can = null, right = null, left = null) {
-            /** @type {(string|Array<string>)} */
+            /** @type {string|Array<string>} */
             this.text = text;
             /** @type {number|null} */
             this.tgobj = null;
@@ -213,4 +216,5 @@
 
     Module['TGuy'] = TGuy;
     Module['TGuyVersion'] = tguy_get_version();
+    Module['TGuyWasmVersion'] = 1000000 * TGUY_WASM_VER_MAJOR + 1000 * TGUY_WASM_VER_MINOR + TGUY_WASM_VER_PATCH;
 })();
